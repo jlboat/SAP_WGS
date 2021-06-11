@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -N haploblocker_10
+#PBS -o haploblocker_10.out
+#PBS -e haploblocker_10.err
+#PBS -l select=1:ncpus=16:mem=128gb,walltime=48:00:00
+#PBS -q tillers
+
+cd ${PBS_O_WORKDIR}
+
+export LD_PRELOAD=""; 
+module add anaconda3/5.1.0-gcc/8.3.1
+source activate r_env
+
+CHROM=10
+VCF=SAP.imputed.all.Chr${CHROM}.vcf.gz
+
+Rscript HaploBlocker.R ${VCF} SAP.imputed.numeric.012.indv ${CHROM} 
