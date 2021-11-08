@@ -1,0 +1,21 @@
+#!/bin/bash
+#PBS -N st_cat_sort_reseq_<CuSo>
+#PBS -l select=1:ncpus=4:mem=25gb,walltime=48:00:00
+#PBS -o st_cat_sort_reseq_<CuSo>.out
+#PBS -e st_cat_sort_reseq_<CuSo>.err
+
+cd $PBS_O_WORKDIR
+
+BASE_DIR="/scratch1/jboatw2/SAP"
+DUPLI=${BASE_DIR}/results/marked_duplicates
+INITIAL=${BASE_DIR}/data/initial_alignments
+NUM_CPUS=4
+
+cd ${BASE_DIR}/results/final_alignments
+
+samtools merge --threads ${NUM_CPUS} - ${DUPLI}/<CuSo>.duplicate_marked.sorted.bam ${INITIAL}/<CuSo>.bam | \
+    samtools sort --threads ${NUM_CPUS} \
+    -O BAM \
+    --reference ${BASE_DIR}/data/references/Sbicolor_454_v3.0.1.fa \
+    -o ${BASE_DIR}/results/final_alignments/<CuSo>.bam
+

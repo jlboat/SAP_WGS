@@ -1,0 +1,11 @@
+library(adegenet)
+library(vcfR)
+
+vcf <- read.vcfR("SAP.imputed.final.MAF_filtered.vcf.gz")
+x <- vcfR2genlight(vcf)
+saveRDS(x, "SAP.imputed.final.MAF_filtered.genlight.RDS")
+rm(vcf)
+grp <- find.clusters(x, max.n.clust=12)
+saveRDS(grp, "group_clusters.RDS")
+dapc1 <- dapc(x, grp$grp)
+saveRDS(dapc1, "dapc_results.RDS")

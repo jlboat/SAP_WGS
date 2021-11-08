@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#PBS -N snpEff_Chr<CHROM>
+#PBS -l select=1:ncpus=3:mem=40gb,walltime=160:00:00
+#PBS -o snpEff_Chr<CHROM>.out
+#PBS -e snpEff_Chr<CHROM>.err
+#PBS -q tillers
+
+BASE_DIR="/scratch2/jboatw2/HDP_sequencing"
+OUTPUT_PATH="${BASE_DIR}/results/vcf_annotations/snpEff"
+VCF="SAP.imputed.vcf.gz"
+INPUT_PATH="/scratch2/jboatw2/HDP_sequencing/results/vcf_annotations/bcftools"
+
+if [ ! -e ${OUTPUT_PATH} ]
+then
+    mkdir -p ${OUTPUT_PATH}
+fi
+
+export PATH=$PATH:/home/jboatw2/snpEff
+cd ${INPUT_PATH}
+
+# bgzip -c -d ${VCF}.vcf.gz > ${OUTPUT_PATH}/${VCF}.vcf
+java -Xmx36g -jar ~/snpEff/snpEff.jar Sorghum_bicolor ${OUTPUT_PATH}/${VCF}.vcf -csvStats ${OUTPUT_PATH}/${VCF}.summary -stats ${OUTPUT_PATH}/${VCF}.stats > ${OUTPUT_PATH}/${VCF}.ann.vcf

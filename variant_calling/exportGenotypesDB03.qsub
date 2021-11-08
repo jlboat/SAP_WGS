@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#PBS -N jointexport03
+#PBS -l select=1:ncpus=4:mem=40gb,walltime=160:00:00
+#PBS -e jointExport03.err
+#PBS -o jointExport03.out
+#PBS -q tillers
+
+# tr '\n' ',' <  /scratch1/jboatw2/BAP_2037/doc/lines.txt | sed 's/,/.CHROM_${i}.vcf.gz -V /g'
+
+BASE_DIR="/scratch1/jboatw2/UNL_1"
+REFERENCE="${BASE_DIR}/data/references/Sbicolor_454_v3.0.1.fa"
+i="03"
+DATABASE="${BASE_DIR}/results/recal_gvcfs/HDP.Chr${i}"
+OUTPUT="${BASE_DIR}/results/joint_calling/HDP.${i}.g.vcf"
+TMP="${BASE_DIR}/results/joint_calling/tmp${i}"
+
+echo "cd ${BASE_DIR}/results/recal_gvcfs"
+cd ${BASE_DIR}/results/recal_gvcfs
+echo "$PWD"
+
+~/gatk-4.1.7.0/gatk --java-options "-Xmx34g -XX:+UseParallelGC -XX:ParallelGCThreads=2" GenotypeGVCFs -R ${REFERENCE} -V gendb://${DATABASE} -O ${OUTPUT} --tmp-dir=${TMP} --genomicsdb-use-vcf-codec

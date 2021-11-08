@@ -4,8 +4,8 @@ Whole-genome sequencing of the Sorghum Asssociation Panel
 
 ## Basic analysis steps:
 
-### imputation and filtering - Beagle and BCFtools scripts
-### basic metrics - LD, nucleotide diversity, PCA
-### GWAS - scripts for each model
-### misc_scripts - epistasis, snpEff, extract gene features from SNPs
-### plots - scripts used to generate manuscript figures
+gwas - scripts for each model
+variant_calling - scripts for GATK variant calling pipeline
+impute_filter - Beagle and BCFtools scripts
+metrics - LD, nucleotide diversity, PCA
+misc_scripts - snpEff, extract gene features from SNPs

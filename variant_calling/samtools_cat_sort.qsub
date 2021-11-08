@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N st_cat_sort_<CuSo>
+#PBS -l select=1:ncpus=4:mem=25gb,walltime=48:00:00
+#PBS -o st_cat_sort_<CuSo>.out
+#PBS -e st_cat_sort_<CuSo>.err
+
+cd $PBS_O_WORKDIR
+
+BASE_DIR="/scratch1/jboatw2/SAP"
+NUM_CPUS=4
+
+cd ${BASE_DIR}/results/alignments
+
+samtools merge --threads ${NUM_CPUS} - <LINE> | \
+    samtools sort --threads ${NUM_CPUS} \
+    -O BAM \
+    --reference ${BASE_DIR}/data/references/Sbicolor_454_v3.0.1.fa \
+    -o ${BASE_DIR}/results/sorted_alignments/<CuSo>.bam
+

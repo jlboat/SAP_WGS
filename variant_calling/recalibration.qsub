@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#PBS -N recal_<SAMPLE>
+#PBS -l select=1:ncpus=3:mem=20gb:interconnect=1g,walltime=160:00:00
+#PBS -o recal_<SAMPLE>.out
+#PBS -e recal_<SAMPLE>.err
+#PBS -q tillers
+
+BASE_DIR="/scratch1/jboatw2/SAP"
+OUTPUT_PATH="${BASE_DIR}/results/recalibrated"
+INPUT_PATH="${BASE_DIR}/results/final_alignments"
+VCF_PATH="${BASE_DIR}/results/joint_calling/filtered"
+
+if [ ! -e ${OUTPUT_PATH} ]
+then
+    mkdir -p ${OUTPUT_PATH}
+fi
+
+cd ${INPUT_PATH}
+
+~/gatk-4.1.7.0/gatk BaseRecalibrator \
+    -I ${INPUT_PATH}/<SAMPLE>.bam \
+    -R ${BASE_DIR}/data/references/Sbicolor_454_v3.0.1.fa \
+    --known-sites ${VCF_PATH}/SAP.hard_filtered.CuSo.vcf.gz \
+    -O ${OUTPUT_PATH}/recal_data.<SAMPLE>.table
+
+~/gatk-4.1.7.0/gatk ApplyBQSR \
+    --input ${INPUT_PATH}/<SAMPLE>.bam \
+    --output ${OUTPUT_PATH}/<SAMPLE>.recalibrated.bam \
+    --bqsr-recal-file ${OUTPUT_PATH}/recal_data.<SAMPLE>.table

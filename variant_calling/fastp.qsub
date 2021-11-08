@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -N fastp_<NUMBER>
+#PBS -l select=1:ncpus=7:mem=7gb,walltime=48:00:00
+#PBS -o fastp_<NUMBER>.out
+#PBS -e fastp_<NUMBER>.err
+
+cd $PBS_O_WORKDIR
+
+BASE_DIR="/scratch1/jboatw2/SAP"
+DESIGN_FILE="${BASE_DIR}/doc/fastqs.txt"
+DESIGN=$(cat ${DESIGN_FILE} | head -n <NUMBER> | tail -n 1)
+
+IFS=',' read -ra ARRAY <<< "${DESIGN}"
+
+INPUT_DIR="${BASE_DIR}/data/raw_reads"
+OUTPUT_DIR="${BASE_DIR}/results/fastp"
+SAMPLE="${OUTPUT_DIR}/${ARRAY[0]}"
+NUM_CPUS=4
+R1="${BASE_DIR}/data/raw_reads/${ARRAY[0]}_R1_001.fastq.gz"
+R2="${BASE_DIR}/data/raw_reads/${ARRAY[0]}_R2_001.fastq.gz"
+
+if [ ! -e ${OUTPUT_DIR} ]
+then
+    mkdir -p ${OUTPUT_DIR}
+fi
+
+singularity run -B /scratch1,/zfs ~/singularity_containers/fastp.sif \
+    --in1 ${R1} \
+    --in2 ${R2} \
+    --out1 ${SAMPLE}.R1.trimmed.paired.fq.gz \
+    --out2 ${SAMPLE}.R2.trimmed.paired.fq.gz \
+    --unpaired1 ${SAMPLE}.R1.trimmed.unpaired.fq.gz \
+    --unpaired2 ${SAMPLE}.R2.trimmed.unpaired.fq.gz \
+    --detect_adapter_for_pe \
+    --thread ${NUM_CPUS} \
+    --json ${SAMPLE}.<NUMBER>.json \
+    --html ${SAMPLE}.<NUMBER>.html \
+    --length_required 40 \
+    --report_title "${ARRAY[0]}.<NUMBER>"
+

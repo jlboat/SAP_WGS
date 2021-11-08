@@ -1,0 +1,27 @@
+#!/bin/bash
+#PBS -N mark_dup_<NUMBER>
+#PBS -l select=1:ncpus=3:mem=21gb,walltime=48:00:00
+#PBS -o mark_dup_<NUMBER>.out
+#PBS -e mark_dup_<NUMBER>.err
+
+cd $PBS_O_WORKDIR
+
+module load anaconda3/5.1.0-gcc/8.3.1
+
+BASE_DIR="/scratch1/jboatw2/SAP"
+
+TEMP_DIR="${TMPDIR}"
+
+DESIGN_FILE="${BASE_DIR}/doc/CUSo.unique.txt"
+DESIGN=$(cat ${DESIGN_FILE} | head -n <NUMBER> | tail -n 1)
+
+IFS=',' read -ra ARRAY <<< "${DESIGN}"
+
+GENOTYPE="${ARRAY[0]}"
+
+~/gatk-4.1.7.0/gatk --java-options "-Xmx16g -XX:+UseParallelGC -XX:ParallelGCThreads=2" MarkDuplicates \
+    --INPUT=${BASE_DIR}/results/sorted_alignments/${GENOTYPE}.bam \
+    --OUTPUT=${BASE_DIR}/results/marked_duplicates/${GENOTYPE}.duplicate_marked.sorted.bam \
+    --METRICS_FILE=${BASE_DIR}/results/duplicate_metrics/${GENOTYPE}.duplicate.metrics \
+    --TMP_DIR=${TEMP_DIR}
+
