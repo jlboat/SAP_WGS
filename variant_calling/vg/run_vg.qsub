@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#PBS -N vg
+#PBS -o vg.out
+#PBS -e vg.err
+#PBS -l select=1:ncpus=16:mem=200gb,walltime=148:00:00
+#PBS -q tillers
+
+cd /scratch1/jboatw2/merge_gvcfs/recal_gvcfs_all/filter/all
+
+# FIRST TEST
+# vg construct -R Chr01 -r Sbicolor_454_v3.0.1.fa -v mid.vcf.gz > mid.vg
+
+module add gnu-parallel/20200722
+
+TMPDIR=/scratch1/jboatw2/tmpdir/
+
+ref=Sbicolor_454_v3.0.1.fa
+vars=SAP.all_variants.vcf.gz
+
+# CONSTRUCT GRAPH PATH
+(seq 1 9) | parallel -j 24 "time vg construct -C -R Chr0{} -r $ref -v $vars -t 1 -m 32 > Chr0{}.vg"
+vg construct --handle-sv -C -R Chr10 -r $ref -v $vars -t 1 -m 32 > Chr10.vg
+
+# NODE ID COORDINATION
+vg ids -j $(for i in $(seq 1 9;); do echo Chr0${i}.vg; done) Chr10.vg
+
+# BUILD THE XG INDEX
+vg index -x wg.xg $(for i in $(seq 1 9;); do echo Chr0${i}.vg; done) Chr10.vg
+
+# PRUNE HIGH-COMPLEXITY REGIONS FROM GRAPH
+for chr in $(seq 1 9);
+do
+    vg prune -r Chr0${chr}.vg > Chr0${chr}.pruned.vg
+done
+vg prune -r Chr10.vg > Chr10.pruned.vg
+
+# BUILD INDEX FOR WHOLE GENOME GRAPH
+vg index -g wg.gcsa $(for i in $(seq 1 9); do echo Chr0${i}.pruned.vg; done) Chr10.pruned.vg
+

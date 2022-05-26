@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+#PBS -N HWE_SAP
+#PBS -l select=1:ncpus=2:mem=50gb:interconnect=10ge,walltime=4:00:00
+
+BASE_DIR="/zfs/tillers/panicle/HDP_data"
+OUTPUT_PATH="${BASE_DIR}/selection/Results"
+VCF="SAP.imputed.MAF_filtered" # sans vcf suffix
+INPUT_PATH="${BASE_DIR}/VCFs/recalibrated"
+
+if [ ! -e ${OUTPUT_PATH} ]
+then
+    mkdir -p ${OUTPUT_PATH}
+fi
+
+cd ${OUTPUT_PATH}
+
+## per site Fst
+#/zfs/tillers/panicle/bin/vcftools --vcf SAP_filtered_HWE_SNPs.recode.vcf --weir-fst-pop Fst_types/converted_cuso.txt --weir-fst-pop Fst_types/historic_selected_cuso.txt --fst-window-size 1000000 --fst-window-step 100000 --out Fst_converted_bred_1Mb_hwe
+
+## Tajima's D
+/zfs/tillers/panicle/bin/vcftools --gzvcf ${INPUT_PATH}/${VCF}.vcf.gz --TajimaD 100000 --out SAP_100kb
+
+## Fst by window
+#/zfs/tillers/panicle/bin/vcftools --gzvcf ${INPUT_PATH}/${VCF}.vcf.gz --weir-fst-pop converted_cuso.txt --weir-fst-pop historic_selected_cuso.txt  --fst-window-size 1000000 --fst-window-step 100000 --out Fst_converted_cuso_historic_selected_cuso_1Mb
+
+#/zfs/tillers/panicle/bin/vcftools --gzvcf ${INPUT_PATH}/${VCF}.vcf.gz --hardy --out SAP_HWE_imputed_MAFfiltered
+

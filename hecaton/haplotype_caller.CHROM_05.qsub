@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N HC_prop_05
+#PBS -l select=1:ncpus=4:mem=20gb:interconnect=1g,walltime=48:00:00
+#PBS -o HC_prop_05.out
+#PBS -e HC_prop_05.err
+
+cd ${PBS_O_WORKDIR}
+
+BASE_DIR="/scratch1/jboatw2/propinquum_hecaton"
+REF="${BASE_DIR}/../SAP/data/references/Sbicolor_454_v3.0.1.fa"
+BAM="${BASE_DIR}/alignments/propinquum369-1_1.bam"
+CHROM="Chr05"
+OUTPUT="${BASE_DIR}/propinquum.Chr${CHROM}.vcf.gz"
+
+~/gatk-4.2.0.0/gatk --java-options "-Xmx16g" HaplotypeCaller  \
+  -L ${CHROM} \
+  -R ${REF} \
+  -I ${BAM} \
+  -O ${OUTPUT}

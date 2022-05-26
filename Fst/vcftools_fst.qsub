@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#PBS -N Fst_conv_bred
+#PBS -l select=1:ncpus=1:mem=25gb,walltime=24:00:00
+#PBS -q tillers
+
+BASE_DIR="/zfs/tillers/panicle/HDP_data"
+OUTPUT_PATH="${BASE_DIR}/selection/Results"
+VCF="SAP.imputed.MAF_filtered" # sans vcf suffix
+INPUT_PATH="${BASE_DIR}/VCFs/recalibrated"
+
+if [ ! -e ${OUTPUT_PATH} ]
+then
+    mkdir -p ${OUTPUT_PATH}
+fi
+
+cd ${OUTPUT_PATH}
+
+
+/zfs/tillers/panicle/bin/vcftools --gzvcf ${INPUT_PATH}/${VCF}.vcf.gz --weir-fst-pop converted_cuso.txt --weir-fst-pop bred_cuso.txt  --fst-window-size 100000 --fst-window-step 200000 --out Fst_conv_bred_100kb

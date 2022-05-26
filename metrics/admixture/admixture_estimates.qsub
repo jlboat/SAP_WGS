@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -N admixture
+#PBS -o admix.out
+#PBS -e admix.err
+#PBS -l select=1:ncpus=4:mem=30gb:interconnect=1g,walltime=72:00:00
+
+cd ${PBS_O_WORKDIR}
+
+for i in {7..8}
+do
+    /zfs/tillers/panicle/bin/admixture final_data.bed ${i} -j4 --cv=5 | tee log${i}.out
+done
